@@ -203,6 +203,8 @@ const PersonalCoachingTips: React.FC = () => {
   );
 };
 
+const APP_MAX_WIDTH = 430;
+
 const BottomBar: React.FC<{
   view: 'home' | 'library' | 'profile';
   onChange: (view: 'home' | 'library' | 'profile') => void;
@@ -217,7 +219,11 @@ const BottomBar: React.FC<{
     <nav
       role="navigation"
       aria-label="Primary"
-      className={cn(card, 'fixed bottom-4 inset-x-0 mx-auto flex max-w-md justify-between px-2 py-1 backdrop-blur-2xl')}
+      className={cn(card, 'fixed bottom-4 inset-x-0 mx-auto flex w-full justify-between py-1 backdrop-blur-2xl')}
+      style={{
+        maxWidth: `min(100vw, ${APP_MAX_WIDTH}px)`,
+        paddingInline: 'clamp(0.5rem, 4vw, 1rem)',
+      }}
     >
       {items.map((item) => {
         const active = view === item.key;
@@ -480,10 +486,16 @@ const EmployeeApp: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full"
+      className="min-h-dvh w-full"
       style={{ background: 'linear-gradient(to bottom, #4b5563, #6b7280)' }}
     >
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pb-24 pt-10 text-white">
+      <div
+        className="mx-auto flex min-h-dvh w-full flex-col pb-24 pt-10 text-white"
+        style={{
+          maxWidth: `min(100vw, ${APP_MAX_WIDTH}px)`,
+          paddingInline: 'clamp(1rem, 5vw, 1.5rem)',
+        }}
+      >
         <main className={cn('flex-1', view === 'login' ? 'flex' : '')}>
           {view === 'login' && <LoginScreen onLogin={() => setView('home')} />}
           {view === 'home' && <EmployeeDashboardHome />}
