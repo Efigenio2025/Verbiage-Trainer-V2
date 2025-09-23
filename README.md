@@ -30,7 +30,7 @@ A Next.js 14 App Router starter with Supabase email/password authentication and 
 
    > The service role key is only used on the server. Do not expose it to the browser.
 
-3. Apply the SQL in [`sql/init.sql`](sql/init.sql) to your Supabase project to create the `profiles` table, trigger, and row-level policies.
+3. Apply the SQL in [`sql/init.sql`](sql/init.sql) to your Supabase project to create the `profiles` table, trigger, and row-level policies. If you encounter a Supabase error such as “Could not find the table `public.profiles` in the schema cache,” it means this script has not been applied yet.
 
 4. Run the development server:
 
