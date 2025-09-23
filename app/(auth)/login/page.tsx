@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import PolarCard from '@/components/PolarCard';
-import { clearAuthCookies, createServerSupabase } from '@/lib/serverSupabase';
+import { createServerSupabase } from '@/lib/serverSupabase';
 import LoginForm from './LoginForm';
 import PasswordResetForm from './PasswordResetForm';
 
@@ -26,7 +26,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   let statusVariant: 'success' | 'error' = 'success';
 
   if (searchParams?.logout === '1') {
-    clearAuthCookies();
     statusMessage = 'You have been signed out.';
   }
 
