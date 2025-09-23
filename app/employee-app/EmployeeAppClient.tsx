@@ -511,9 +511,7 @@ export default function EmployeeAppClient({ userEmail, userRole, profileUpdatedA
 
   const handleBottomNavChange = useCallback((next: Extract<View, 'home' | 'library' | 'profile'>) => {
     setView(next);
-    if (next !== 'detail') {
-      setSelectedModule(null);
-    }
+    setSelectedModule(null);
   }, []);
 
   const handleSignOut = useCallback(() => {
