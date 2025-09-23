@@ -15,7 +15,7 @@ export default function AppNav({ brand, userEmail }: AppNavProps) {
         {userEmail ? (
           <>
             <span className="app-nav__user">{userEmail}</span>
-            <Link href="/login?logout=1" className="btn btn-outline">
+            <Link href="/auth/logout" className="btn btn-outline">
               Sign out
             </Link>
           </>
