@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import PolarCard from '@/components/PolarCard';
 import { createServerSupabase } from '@/lib/serverSupabase';
-import { sanitizeNextPath } from '@/lib/sanitizeNextPath';
+import { getDefaultNextPath, sanitizeNextPath } from '@/lib/sanitizeNextPath';
 import LoginForm from './LoginForm';
 import PasswordResetForm from './PasswordResetForm';
 
@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect(nextParam || '/app');
+    redirect(nextParam || getDefaultNextPath());
   }
 
   return (

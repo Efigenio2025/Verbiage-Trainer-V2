@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { loginAction } from './actions';
+import { getDefaultNextPath } from '@/lib/sanitizeNextPath';
 
 const initialState = { status: 'idle' as const, message: '', redirectTo: '' };
 
@@ -33,7 +34,7 @@ export default function LoginForm({ nextPath }: LoginFormProps) {
 
   return (
     <form action={formAction} className="form-grid">
-      <input type="hidden" name="next" value={nextPath ?? '/app'} />
+      <input type="hidden" name="next" value={nextPath ?? getDefaultNextPath()} />
       <label>
         Email
         <input type="email" name="email" placeholder="you@example.com" required autoComplete="email" />

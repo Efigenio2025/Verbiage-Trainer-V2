@@ -2,16 +2,12 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import PolarCard from '@/components/PolarCard';
 import { createServerSupabase } from '@/lib/serverSupabase';
+import { sanitizeNextPath } from '@/lib/sanitizeNextPath';
 import SignupForm from './SignupForm';
 
 type SignupPageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
 };
-
-function sanitizeNext(path?: string): string {
-  if (!path) return '/app';
-  return path.startsWith('/') ? path : '/app';
-}
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
   const supabase = await createServerSupabase();
@@ -20,7 +16,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    const nextParam = sanitizeNext(typeof searchParams?.next === 'string' ? searchParams.next : undefined);
+    const nextParam = sanitizeNextPath(typeof searchParams?.next === 'string' ? searchParams.next : null);
     redirect(nextParam);
   }
 
