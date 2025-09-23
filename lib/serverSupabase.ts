@@ -6,8 +6,12 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase environment variables are not set.');
+function requirePublicSupabaseCredentials(): { supabaseUrl: string; supabaseAnonKey: string } {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase environment variables are not set.');
+  }
+
+  return { supabaseUrl, supabaseAnonKey };
 }
 
 const secureCookie = process.env.NODE_ENV === 'production';
@@ -22,6 +26,7 @@ export async function createServerSupabase(): Promise<SupabaseClient> {
   const cookieStore = cookies();
   const accessToken = cookieStore.get('sb-access-token')?.value;
   const refreshToken = cookieStore.get('sb-refresh-token')?.value;
+  const { supabaseUrl, supabaseAnonKey } = requirePublicSupabaseCredentials();
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: false,
@@ -37,6 +42,8 @@ export async function createServerSupabase(): Promise<SupabaseClient> {
 }
 
 export function createServiceRoleSupabase(): SupabaseClient {
+  const { supabaseUrl } = requirePublicSupabaseCredentials();
+
   if (!serviceRoleKey) {
     throw new Error('SUPABASE_SERVICE_ROLE_KEY must be set for server operations.');
   }

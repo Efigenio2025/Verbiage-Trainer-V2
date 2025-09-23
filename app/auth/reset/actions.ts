@@ -1,6 +1,6 @@
 'use server';
 
-import { createServerSupabase, setAuthCookies } from '@/lib/serverSupabase';
+import { createServerSupabase } from '@/lib/serverSupabase';
 
 type ResetPasswordState = {
   status: 'idle' | 'error' | 'success';
@@ -30,14 +30,10 @@ export async function updatePasswordAction(_: ResetPasswordState, formData: Form
     return { status: 'error', message: 'Reset link is invalid or has expired.' };
   }
 
-  const { data, error } = await supabase.auth.updateUser({ password });
+  const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
     return { status: 'error', message: error.message };
-  }
-
-  if (data.session) {
-    await setAuthCookies(data.session);
   }
 
   return {
