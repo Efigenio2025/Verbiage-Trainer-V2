@@ -3,6 +3,7 @@
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { setAuthCookies } from '@/lib/serverSupabase';
+import { sanitizeNextPath } from '@/lib/sanitizeNextPath';
 
 type LoginState = {
   status: 'idle' | 'error' | 'success';
@@ -13,8 +14,8 @@ type LoginState = {
 export async function loginAction(_: LoginState, formData: FormData): Promise<LoginState> {
   const email = String(formData.get('email') ?? '').trim();
   const password = String(formData.get('password') ?? '');
-  const nextRaw = String(formData.get('next') ?? '/app');
-  const nextPath = nextRaw.startsWith('/') ? nextRaw : '/app';
+  const nextRaw = formData.get('next');
+  const nextPath = sanitizeNextPath(typeof nextRaw === 'string' ? nextRaw : null);
 
   if (!email || !password) {
     return { status: 'error', message: 'Email and password are required.' };

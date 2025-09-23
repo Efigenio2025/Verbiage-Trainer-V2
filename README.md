@@ -8,6 +8,7 @@ A Next.js 14 App Router starter with Supabase email/password authentication and 
 - Secure http-only cookies (`sb-access-token`, `sb-refresh-token`) for protected sessions.
 - Polar themed UI with reusable `PolarCard`, `AppNav`, and `RoleBadge` components.
 - Protected dashboard at `/app` guarded by middleware.
+- Original employee training experience now lives at `/employee-app`, powered by the Tailwind-based UI from the standalone Vite app.
 - Server/client Supabase helpers for both environments.
 - Starter SQL for Supabase schema, trigger, and policies.
 
@@ -26,6 +27,8 @@ A Next.js 14 App Router starter with Supabase email/password authentication and 
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    NEXT_PUBLIC_APP_BRAND=Polar Ops Command
+   # Optional: change the default redirect after login/signup/reset.
+   NEXT_PUBLIC_DEFAULT_REDIRECT_PATH=/employee-app
    ```
 
    > The service role key is only used on the server. Do not expose it to the browser.

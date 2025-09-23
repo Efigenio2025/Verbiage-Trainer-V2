@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { updatePasswordAction } from './actions';
+import { getDefaultNextPath } from '@/lib/sanitizeNextPath';
 
 const initialState = { status: 'idle' as const, message: '', redirectTo: '' };
 
@@ -32,7 +33,7 @@ export default function ResetForm({ nextPath }: { nextPath?: string }) {
 
   return (
     <form action={formAction} className="form-grid">
-      <input type="hidden" name="next" value={nextPath ?? '/app'} />
+      <input type="hidden" name="next" value={nextPath ?? getDefaultNextPath()} />
       <label>
         New password
         <input type="password" name="password" placeholder="At least 8 characters" minLength={8} required autoComplete="new-password" />

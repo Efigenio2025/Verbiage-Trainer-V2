@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+const protectedPrefixes = ['/app', '/employee-app'];
+
+function isProtectedPath(pathname: string): boolean {
+  return protectedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
 export async function middleware(request: NextRequest) {
-  if (!request.nextUrl.pathname.startsWith('/app')) {
+  if (!isProtectedPath(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
 
@@ -58,5 +64,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/app/:path*']
+  matcher: ['/app/:path*', '/employee-app/:path*']
 };

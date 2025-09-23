@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { PropsWithChildren } from 'react';
+import './globals.css';
 import '../polar.css';
 import AppNav from '@/components/AppNav';
 import { createServerSupabase } from '@/lib/serverSupabase';
@@ -20,7 +21,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     <html lang="en">
       <body className="polar-body">
         <AppNav brand={brand} userEmail={user?.email ?? null} />
-        <div className="app-shell">{children}</div>
+        {children}
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 import PolarCard from '@/components/PolarCard';
 import RoleBadge from '@/components/RoleBadge';
+import { mapProfileError } from '@/lib/profile';
 import { createServerSupabase } from '@/lib/serverSupabase';
-import type { PostgrestError } from '@supabase/supabase-js';
 
 export default async function AppDashboard() {
   const supabase = await createServerSupabase();
@@ -49,17 +49,4 @@ export default async function AppDashboard() {
       </PolarCard>
     </main>
   );
-}
-
-function mapProfileError(error: PostgrestError | null): string | null {
-  if (!error) return null;
-
-  const missingTableCodes = new Set(['PGRST301', 'PGRST302', '42P01']);
-  const normalizedMessage = error.message.toLowerCase();
-
-  if (missingTableCodes.has(error.code ?? '') || normalizedMessage.includes('schema cache')) {
-    return 'Profiles table missing. Run the SQL in sql/init.sql against your Supabase project to provision it.';
-  }
-
-  return 'Unable to load profile details right now.';
 }

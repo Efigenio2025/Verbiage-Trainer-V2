@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import PolarCard from '@/components/PolarCard';
 import { createServerSupabase } from '@/lib/serverSupabase';
+import { getDefaultNextPath } from '@/lib/sanitizeNextPath';
 import ResetForm from './ResetForm';
 
 export default async function ResetPasswordPage() {
@@ -16,7 +17,7 @@ export default async function ResetPasswordPage() {
   return (
     <main className="page">
       <PolarCard title="Set a new password" subtitle={`Resetting for ${user.email}`}>
-        <ResetForm nextPath="/app" />
+        <ResetForm nextPath={getDefaultNextPath()} />
       </PolarCard>
     </main>
   );
