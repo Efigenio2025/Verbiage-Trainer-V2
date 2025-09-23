@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { clearAuthCookiesOnResponse, setAuthCookiesOnResponse } from '@/lib/serverSupabase';
-
-function sanitizeNext(path?: string | null): string {
-  if (!path) return '/app';
-  return path.startsWith('/') ? path : '/app';
-}
+import { sanitizeNextPath } from '@/lib/sanitizeNextPath';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get('code');
-  const nextPath = sanitizeNext(searchParams.get('next'));
+  const nextPath = sanitizeNextPath(searchParams.get('next'));
 
   const loginRedirect = new URL('/login', origin);
   if (!code) {
