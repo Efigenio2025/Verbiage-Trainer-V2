@@ -1,0 +1,59 @@
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import PolarCard from '@/components/PolarCard';
+import { clearAuthCookies, createServerSupabase } from '@/lib/serverSupabase';
+import LoginForm from './LoginForm';
+import PasswordResetForm from './PasswordResetForm';
+
+type LoginPageProps = {
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
+function sanitizeNext(path?: string): string {
+  if (!path) return '/app';
+  return path.startsWith('/') ? path : '/app';
+}
+
+const errorMessages: Record<string, string> = {
+  missing_code: 'The verification link is missing a token. Please request a new email.',
+  configuration_error: 'Server configuration is incomplete. Contact an administrator.',
+  auth_error: 'Authentication failed. Please try again.'
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const nextParam = sanitizeNext(typeof searchParams?.next === 'string' ? searchParams.next : undefined);
+  let statusMessage: string | null = null;
+  let statusVariant: 'success' | 'error' = 'success';
+
+  if (searchParams?.logout === '1') {
+    clearAuthCookies();
+    statusMessage = 'You have been signed out.';
+  }
+
+  if (typeof searchParams?.error === 'string') {
+    statusVariant = 'error';
+    statusMessage = errorMessages[searchParams.error] ?? searchParams.error;
+  }
+
+  const supabase = await createServerSupabase();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect(nextParam || '/app');
+  }
+
+  return (
+    <main className="page">
+      <PolarCard title="Welcome back" subtitle="Access the Polar Ops console">
+        {statusMessage && <p className={`status-message ${statusVariant}`}>{statusMessage}</p>}
+        <LoginForm nextPath={nextParam} />
+        <PasswordResetForm />
+        <p className="helper-text">
+          No account yet? <Link href="/signup">Create one</Link>.
+        </p>
+      </PolarCard>
+    </main>
+  );
+}
