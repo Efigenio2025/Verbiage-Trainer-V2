@@ -1,0 +1,285 @@
+:root {
+  --polar-bg: linear-gradient(160deg, #0f172a 0%, #1e3a8a 50%, #38bdf8 100%);
+  --polar-card: rgba(15, 23, 42, 0.65);
+  --polar-card-border: rgba(148, 163, 184, 0.2);
+  --polar-text: #e2e8f0;
+  --polar-muted: #cbd5f5;
+  --polar-primary: #38bdf8;
+  --polar-primary-dark: #0ea5e9;
+  --polar-outline: rgba(56, 189, 248, 0.5);
+  --polar-radius: 1.5rem;
+  --polar-shadow: 0 20px 50px rgba(15, 23, 42, 0.45);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--polar-text);
+  background: var(--polar-bg);
+  min-height: 100%;
+}
+
+body {
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.polar-body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(20px);
+  background: rgba(15, 23, 42, 0.45);
+  border-bottom: 1px solid var(--polar-card-border);
+}
+
+.app-nav__brand {
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.app-nav__links {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.app-nav__user {
+  font-size: 0.875rem;
+  opacity: 0.85;
+}
+
+.polar-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 2.5rem;
+  border-radius: var(--polar-radius);
+  background: var(--polar-card);
+  border: 1px solid var(--polar-card-border);
+  box-shadow: var(--polar-shadow);
+  backdrop-filter: blur(18px);
+  color: var(--polar-text);
+}
+
+.polar-card__header {
+  margin-bottom: 1.5rem;
+}
+
+.polar-card__title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.polar-card__subtitle {
+  margin-top: 0.5rem;
+  color: var(--polar-muted);
+  font-size: 0.95rem;
+}
+
+.polar-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+input[type='email'],
+input[type='password'],
+input[type='text'] {
+  border-radius: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.5);
+  color: var(--polar-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='text']:focus {
+  outline: none;
+  border-color: var(--polar-outline);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--polar-primary), var(--polar-primary-dark));
+  color: #0b1120;
+  box-shadow: 0 12px 30px rgba(14, 165, 233, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(14, 165, 233, 0.45);
+}
+
+.btn-outline {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.4);
+  color: var(--polar-text);
+}
+
+.btn-outline:hover {
+  border-color: var(--polar-primary);
+}
+
+.btn-subtle {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--polar-muted);
+}
+
+.btn-subtle:hover {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.helper-text {
+  font-size: 0.85rem;
+  color: var(--polar-muted);
+}
+
+.status-message {
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.status-message.error {
+  border-color: rgba(248, 113, 113, 0.7);
+  color: #fecaca;
+}
+
+.status-message.success {
+  border-color: rgba(74, 222, 128, 0.5);
+  color: #bbf7d0;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge-employee {
+  background: rgba(56, 189, 248, 0.15);
+  color: #bae6fd;
+}
+
+.badge-manager {
+  background: rgba(129, 140, 248, 0.18);
+  color: #c7d2fe;
+}
+
+.badge-admin {
+  background: rgba(248, 113, 113, 0.22);
+  color: #fecaca;
+}
+
+.dashboard {
+  width: 100%;
+  max-width: 720px;
+}
+
+.dashboard h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.dashboard__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.muted {
+  color: rgba(226, 232, 240, 0.65);
+}
+
+@media (max-width: 640px) {
+  .app-nav {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .app-shell {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .polar-card {
+    padding: 2rem;
+  }
+}
+
+.page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
