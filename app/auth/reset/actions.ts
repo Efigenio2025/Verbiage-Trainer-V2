@@ -1,6 +1,7 @@
 'use server';
 
 import { createServerSupabase } from '@/lib/serverSupabase';
+import { sanitizeNextPath } from '@/lib/sanitizeNextPath';
 
 type ResetPasswordState = {
   status: 'idle' | 'error' | 'success';
@@ -8,14 +9,10 @@ type ResetPasswordState = {
   redirectTo?: string;
 };
 
-function sanitizeNext(path?: string): string {
-  if (!path) return '/app';
-  return path.startsWith('/') ? path : '/app';
-}
-
 export async function updatePasswordAction(_: ResetPasswordState, formData: FormData): Promise<ResetPasswordState> {
   const password = String(formData.get('password') ?? '');
-  const nextPath = sanitizeNext(String(formData.get('next') ?? '/app'));
+  const nextRaw = formData.get('next');
+  const nextPath = sanitizeNextPath(typeof nextRaw === 'string' ? nextRaw : null);
 
   if (!password || password.length < 8) {
     return { status: 'error', message: 'Password must be at least 8 characters long.' };
