@@ -13,6 +13,7 @@ import {
   Type,
   User
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import './index.css';
 
 type View = 'login' | 'home' | 'library' | 'profile' | 'detail';
@@ -25,7 +26,7 @@ type Module = {
   description: string;
   category: ModuleCategory;
   progress: number;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: LucideIcon;
 };
 
 type FilterValue = 'All' | ModuleCategory;
@@ -223,7 +224,7 @@ type BottomBarProps = {
 };
 
 function BottomBar({ view, onChange }: BottomBarProps) {
-  const items: Array<{ key: Extract<View, 'home' | 'library' | 'profile'>; label: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }> = [
+  const items: Array<{ key: Extract<View, 'home' | 'library' | 'profile'>; label: string; icon: LucideIcon }> = [
     { key: 'home', label: 'Home', icon: User },
     { key: 'library', label: 'Library', icon: BookOpen },
     { key: 'profile', label: 'Profile', icon: IdCard }
