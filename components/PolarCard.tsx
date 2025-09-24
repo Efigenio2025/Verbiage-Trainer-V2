@@ -6,11 +6,12 @@ type PolarCardProps = {
   subtitle?: string;
   children: ReactNode;
   className?: string;
+  id?: string;
 };
 
-export default function PolarCard({ title, subtitle, children, className }: PolarCardProps) {
+export default function PolarCard({ title, subtitle, children, className, id }: PolarCardProps) {
   return (
-    <section className={clsx('polar-card', className)}>
+    <section id={id} className={clsx('polar-card', className)}>
       {(title || subtitle) && (
         <header className="polar-card__header">
           {title && <h1 className="polar-card__title">{title}</h1>}
