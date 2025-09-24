@@ -16,12 +16,14 @@ const categoryGlyph: Record<string, string> = {
 
 type EmployeeTrainingLibraryProps = {
   modules: TrainingModule[];
-  backHref: string;
+  backHref?: string;
+  onBack?: () => void;
 };
 
 export default function EmployeeTrainingLibrary({
   modules,
-  backHref
+  backHref,
+  onBack
 }: EmployeeTrainingLibraryProps) {
   const [activeCategory, setActiveCategory] = useState<LibraryCategory>('All');
 
@@ -36,23 +38,52 @@ export default function EmployeeTrainingLibrary({
   return (
     <div className="employee-library">
       <div className="employee-topbar">
-        <Link href={backHref} className="employee-topbar__back" aria-label="Back to Home">
-          <svg
-            className="employee-topbar__icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
+        {onBack ? (
+          <button
+            type="button"
+            className="employee-topbar__back"
+            aria-label="Back to Home"
+            onClick={onBack}
           >
-            <path
-              d="M15 5L8 12L15 19"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
+            <svg
+              className="employee-topbar__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M15 5L8 12L15 19"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        ) : (
+          <Link
+            href={backHref ?? '/app'}
+            className="employee-topbar__back"
+            aria-label="Back to Home"
+          >
+            <svg
+              className="employee-topbar__icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M15 5L8 12L15 19"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+        )}
         <h1 className="employee-topbar__title">Training Library</h1>
       </div>
 
