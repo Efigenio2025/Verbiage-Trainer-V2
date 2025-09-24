@@ -13,7 +13,6 @@ import {
   managerSnapshotMetrics,
   managerTeamReadiness
 } from '@/lib/roleDashboards';
-import { getActiveTrainingModule, trainingLibrary, trainingMilestones } from '@/lib/trainingLibrary';
 
 type SupportedRole = 'employee' | 'manager' | 'admin';
 
@@ -24,6 +23,30 @@ type DashboardCommonProps = {
   updatedAt: Date | null;
   profileError: string | null;
 };
+
+const quickMetrics = [
+  { label: 'Assigned', value: '3' },
+  { label: 'Avg Acc', value: '96%' },
+  { label: 'Streak', value: '5 days' }
+];
+
+const assignedTraining = [
+  { title: 'De-ice Verbiage – Level 1', due: 'Due Fri', tone: 'default' as const },
+  { title: 'Phonetic Alphabet – Accuracy', due: 'Due Today', tone: 'warn' as const },
+  { title: 'Aircraft Movement – Tow & Push', due: 'Due Mon', tone: 'default' as const }
+];
+
+const recentScores = [
+  { label: 'De-ice Callouts Drill', meta: '92% • 2d ago' },
+  { label: 'Phonetic Alphabet Speed', meta: '88% • 5d ago' },
+  { label: 'Pushback Script', meta: '95% • 1w ago' }
+];
+
+const coachingTips = [
+  { icon: '▲', text: 'Your de-ice calls are trending upward—keep the cadence steady during shift change.' },
+  { icon: '▼', text: 'Accuracy dipped on the alphabet sprint; slow the tempo for the next timed drill.' },
+  { icon: '•', text: 'Maintain consistent towing phrasing so the tug team gets the same cues every time.' }
+];
 
 export default async function AppDashboard() {
   const supabase = await createServerSupabase();
@@ -59,158 +82,112 @@ export default async function AppDashboard() {
     profileError
   };
 
-  const activeTraining = role === 'employee' ? getActiveTrainingModule() : undefined;
-
   return (
     <main className="page">
-      <div className="dashboard">
+      <div className={role === 'employee' ? 'employee-dashboard-shell' : 'dashboard'}>
         {role === 'admin' ? (
           <AdminDashboard {...commonProps} />
         ) : role === 'manager' ? (
           <ManagerDashboard {...commonProps} />
         ) : (
-          <EmployeeDashboard {...commonProps} activeTraining={activeTraining} />
+          <EmployeeDashboard {...commonProps} />
         )}
       </div>
     </main>
   );
 }
 
-type EmployeeDashboardProps = DashboardCommonProps & {
-  activeTraining: ReturnType<typeof getActiveTrainingModule>;
-};
-
-function EmployeeDashboard({
-  activeTraining,
-  authEmail,
-  contactEmail,
-  displayName,
-  profileError,
-  updatedAt
-}: EmployeeDashboardProps) {
-  const upcomingMilestones = trainingMilestones.map((milestone) => ({
-    ...milestone,
-    href: `/app/trainings/${milestone.moduleSlug}`
-  }));
+function EmployeeDashboard({ profileError, updatedAt }: DashboardCommonProps) {
+  const navItems = [
+    { label: 'Home', href: '#employee-home', active: true },
+    { label: 'Library', href: '#assigned-training', active: false },
+    { label: 'Profile', href: '#coaching-tips', active: false }
+  ];
 
   return (
     <>
-      <PolarCard
-        title="Polar Ops Command"
-        subtitle={authEmail ? `Authenticated as ${authEmail}` : 'Supabase session not detected'}
-        className="dashboard-card dashboard-card--profile"
-      >
-        <div className="dashboard__meta">
-          <div>
-            <p className="muted">Welcome back</p>
-            <h2 className="dashboard__headline">{displayName}</h2>
-            <p className="dashboard__subheadline">
-              Review your status and jump into today&apos;s communication drills.
-            </p>
-          </div>
-          <div className="dashboard__details">
-            <div>
-              <span className="muted">Role</span>
-              <div>
-                <RoleBadge role="employee" />
-              </div>
+      <div id="employee-home" className="employee-dashboard">
+        <header className="employee-dashboard__header">
+          <p className="employee-dashboard__eyebrow">Welcome back</p>
+          <h1 className="employee-dashboard__title">Employee Dashboard</h1>
+        </header>
+        {updatedAt && (
+          <p className="employee-dashboard__timestamp">Last updated {updatedAt.toLocaleString()}</p>
+        )}
+        {profileError && <p className="employee-dashboard__error">{profileError}</p>}
+
+        <div className="employee-dashboard__metrics">
+          {quickMetrics.map((metric) => (
+            <div key={metric.label} className="employee-dashboard__metric">
+              <span className="employee-dashboard__metric-label">{metric.label}</span>
+              <span className="employee-dashboard__metric-value">{metric.value}</span>
             </div>
-            <div>
-              <span className="muted">Email</span>
-              <p>{contactEmail}</p>
-            </div>
-            {activeTraining && (
-              <div>
-                <span className="muted">Active module</span>
-                <p className="dashboard__detail-title">{activeTraining.title}</p>
-                <p className="muted">
-                  {activeTraining.progress}% complete · {activeTraining.duration}
-                </p>
+          ))}
+        </div>
+
+        <section id="assigned-training" className="employee-dashboard__card">
+          <h2 className="employee-dashboard__card-title">Assigned Training</h2>
+          <div className="employee-dashboard__rows">
+            {assignedTraining.map((training) => (
+              <div key={training.title} className="employee-dashboard__row">
+                <span className="employee-dashboard__row-title">{training.title}</span>
+                <span
+                  className={`employee-dashboard__tag${
+                    training.tone === 'warn' ? ' employee-dashboard__tag--warn' : ''
+                  }`}
+                >
+                  {training.due}
+                </span>
               </div>
-            )}
+            ))}
           </div>
-          {profileError && <p className="status-message error">{profileError}</p>}
-          {updatedAt && (
-            <p className="muted">Last updated {updatedAt.toLocaleString()}</p>
-          )}
-          <div className="dashboard__quick">
-            {activeTraining && (
-              <Link href={`/app/trainings/${activeTraining.slug}`} className="btn btn-primary">
-                Resume training
-              </Link>
-            )}
-            <Link href="#training-library" className="btn btn-outline">
-              Browse trainings
+        </section>
+
+        <section id="recent-scores" className="employee-dashboard__card">
+          <div className="employee-dashboard__card-header">
+            <h2 className="employee-dashboard__card-title">Recent Scores</h2>
+            <Link href="#recent-scores" className="employee-dashboard__action">
+              See all
             </Link>
           </div>
-        </div>
-      </PolarCard>
+          <div className="employee-dashboard__rows">
+            {recentScores.map((score) => (
+              <div key={score.label} className="employee-dashboard__row">
+                <span className="employee-dashboard__row-title">{score.label}</span>
+                <span className="employee-dashboard__row-meta">{score.meta}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <PolarCard
-        id="training-library"
-        title="Training library"
-        subtitle="Choose a module to focus on today."
-        className="dashboard-card"
-      >
-        <ul className="training-grid">
-          {trainingLibrary.map((training) => (
-            <li key={training.slug}>
-              <Link href={`/app/trainings/${training.slug}`} className="training-card">
-                <div className="training-card__meta">
-                  <span
-                    className={`training-card__status training-card__status--${training.status
-                      .toLowerCase()
-                      .replace(/\s+/g, '-')}`}
-                  >
-                    {training.status}
-                  </span>
-                  <span className="training-card__duration">{training.duration}</span>
-                </div>
-                <h3 className="training-card__title">{training.title}</h3>
-                <p className="training-card__description">{training.summary}</p>
-                <div className="training-card__tags">
-                  <span className="training-card__tag">{training.category}</span>
-                  <span className="training-card__tag">{training.level}</span>
-                </div>
-                <div className="training-card__progress">
-                  <div className="training-card__progress-bar">
-                    <span
-                      className="training-card__progress-fill"
-                      style={{ width: `${training.progress}%` }}
-                    />
-                  </div>
-                  <span className="training-card__progress-value">{training.progress}% complete</span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </PolarCard>
-
-      <PolarCard
-        title="Upcoming milestones"
-        subtitle="Stay ahead of your assigned checkpoints."
-        className="dashboard-card"
-      >
-        <ul className="dashboard-list">
-          {upcomingMilestones.map((milestone) => {
-            const training = trainingLibrary.find((item) => item.slug === milestone.moduleSlug);
-
-            return (
-              <li key={milestone.id}>
-                <Link href={milestone.href} className="dashboard-list__item">
-                  <div>
-                    <p className="dashboard-list__title">{milestone.title}</p>
-                    <p className="dashboard-list__description">{milestone.description}</p>
-                    {training && <span className="dashboard-list__badge">{training.title}</span>}
-                  </div>
-                  <span className="dashboard-list__due">{milestone.due}</span>
-                </Link>
+        <section id="coaching-tips" className="employee-dashboard__card">
+          <h2 className="employee-dashboard__card-title">Personal Coaching Tips</h2>
+          <ul className="employee-dashboard__tips">
+            {coachingTips.map((tip) => (
+              <li key={tip.text} className="employee-dashboard__tip">
+                <span className="employee-dashboard__tip-icon" aria-hidden="true">
+                  {tip.icon}
+                </span>
+                <span>{tip.text}</span>
               </li>
-            );
-          })}
-        </ul>
-      </PolarCard>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <nav className="employee-dashboard__nav" aria-label="Employee navigation">
+        {navItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={`employee-dashboard__nav-item${
+              item.active ? ' employee-dashboard__nav-item--active' : ''
+            }`}
+          >
+            <span className="employee-dashboard__nav-label">{item.label}</span>
+          </Link>
+        ))}
+      </nav>
     </>
   );
 }

@@ -745,3 +745,229 @@ input[type='text']:focus {
   display: flex;
   justify-content: center;
 }
+
+.employee-dashboard-shell {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.employee-dashboard {
+  width: 100%;
+  max-width: 28rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 3.5rem 1.5rem 6.75rem;
+}
+
+.employee-dashboard__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: center;
+  text-align: center;
+}
+
+.employee-dashboard__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.employee-dashboard__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.employee-dashboard__timestamp {
+  margin: -0.25rem 0 0;
+  text-align: center;
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.employee-dashboard__error {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #fecaca;
+  background: rgba(248, 113, 113, 0.16);
+  border: 1px solid rgba(252, 165, 165, 0.35);
+  border-radius: 0.85rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.employee-dashboard__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.employee-dashboard__metric {
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  backdrop-filter: blur(14px);
+}
+
+.employee-dashboard__metric-label {
+  font-size: 0.625rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.employee-dashboard__metric-value {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.employee-dashboard__card {
+  border-radius: 1.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.employee-dashboard__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.employee-dashboard__card-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.employee-dashboard__action {
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
+}
+
+.employee-dashboard__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.employee-dashboard__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.employee-dashboard__row:last-child {
+  border-bottom: none;
+}
+
+.employee-dashboard__row-title {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.employee-dashboard__row-meta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.employee-dashboard__tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.625rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.employee-dashboard__tag--warn {
+  background: rgba(251, 191, 36, 0.2);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: rgba(255, 237, 213, 0.9);
+}
+
+.employee-dashboard__tips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.employee-dashboard__tip {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.employee-dashboard__tip-icon {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  opacity: 0.8;
+}
+
+.employee-dashboard__nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 1rem;
+  margin: 0 auto;
+  max-width: 28rem;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(18px);
+  z-index: 20;
+}
+
+.employee-dashboard__nav-item {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 0.55rem 0;
+  border-radius: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.employee-dashboard__nav-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.employee-dashboard__nav-item--active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.employee-dashboard__nav-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+}
