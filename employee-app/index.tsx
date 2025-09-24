@@ -35,7 +35,7 @@ export function cn(...values: Array<string | false | null | undefined>): string 
   return values.filter(Boolean).join(' ');
 }
 
-export const card = 'rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl';
+export const card = 'rounded-2xl border border-white/10 bg-white/5 backdrop-blur shadow-md shadow-black/20';
 
 type SectionProps = {
   title: string;
@@ -45,7 +45,7 @@ type SectionProps = {
 function Section({ title, children }: SectionProps) {
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold tracking-wide text-white/80">{title}</h2>
+      <h2 className="text-sm font-semibold tracking-wide text-white/85">{title}</h2>
       {children}
     </section>
   );
@@ -59,8 +59,8 @@ type AssignedRowProps = {
 function AssignedRow({ title, due }: AssignedRowProps) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
-      <span className="font-medium text-white/90">{title}</span>
-      <span className="text-white/60">Due {due}</span>
+      <span className="font-medium text-white/95">{title}</span>
+      <span className="text-white/70">Due {due}</span>
     </div>
   );
 }
@@ -75,10 +75,10 @@ function ScoreRow({ label, score, when }: ScoreRowProps) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
       <div>
-        <p className="font-medium text-white/90">{label}</p>
-        <p className="text-xs text-white/60">{when}</p>
+        <p className="font-medium text-white/95">{label}</p>
+        <p className="text-xs text-white/70">{when}</p>
       </div>
-      <span className="text-base font-semibold text-white">{score}</span>
+      <span className="text-base font-semibold text-white/95">{score}</span>
     </div>
   );
 }
@@ -110,10 +110,8 @@ function FilterChips({ value, onChange }: FilterChipsProps) {
           type="button"
           onClick={() => onChange(chip)}
           className={cn(
-            'whitespace-nowrap rounded-full border px-4 py-2 text-sm transition-colors',
-            value === chip
-              ? 'border-white/30 bg-white/20 text-white'
-              : 'border-white/10 bg-white/5 text-white/70 hover:text-white'
+            'flex h-10 items-center justify-center whitespace-nowrap rounded-xl border border-white/15 px-3 text-sm transition-colors',
+            value === chip ? 'bg-white/20 text-white' : 'bg-white/10 text-white/85 hover:text-white'
           )}
         >
           {chip}
@@ -137,14 +135,14 @@ function ModuleCard({ m, onOpen }: ModuleCardProps) {
       className={cn(card, 'flex w-full flex-col items-start gap-3 rounded-2xl p-4 text-left transition-transform hover:scale-[0.99] active:scale-[0.98]')}
     >
       <div className="flex w-full items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white/95">
           <Icon className="h-5 w-5" />
         </div>
         <div className="flex-1">
-          <p className="text-base font-semibold text-white">{m.title}</p>
-          <p className="text-xs text-white/70">{m.description}</p>
+          <p className="text-base font-semibold text-white/95">{m.title}</p>
+          <p className="text-xs text-white/85">{m.description}</p>
         </div>
-        <span className="text-sm font-medium text-white/80">{m.progress}%</span>
+        <span className="text-sm font-medium text-white/85">{m.progress}%</span>
       </div>
       <ProgressBar value={m.progress} />
     </button>
@@ -200,13 +198,13 @@ function PersonalCoachingTips() {
 
   return (
     <div className={cn(card, 'p-4')}>
-      <h3 className="text-base font-semibold text-white">Personal Coaching Tips</h3>
+      <h3 className="text-base font-semibold text-white/95">Personal Coaching Tips</h3>
       <ul className="mt-3 space-y-3 text-sm text-white/85">
         {bullets.map((item, idx) => {
           const Icon = item.icon;
           return (
             <li key={idx} className="flex items-start gap-3">
-              <span className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-white">
+              <span className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-white/95">
                 <Icon className="h-4 w-4" />
               </span>
               <span className="leading-relaxed text-white/85">{item.text}</span>
@@ -235,8 +233,7 @@ function BottomBar({ view, onChange }: BottomBarProps) {
       role="navigation"
       aria-label="Primary"
       className={cn(
-        card,
-        'fixed bottom-4 left-1/2 z-10 flex w-[min(100%-2rem,28rem)] -translate-x-1/2 items-center justify-between gap-1 px-2 py-1 text-sm shadow-lg'
+        'fixed bottom-4 left-1/2 z-10 flex w-[min(100%-2rem,28rem)] -translate-x-1/2 items-center justify-between gap-1 rounded-2xl border border-white/15 bg-white/5 px-2 py-1 text-sm shadow-md shadow-black/20 backdrop-blur'
       )}
     >
       {items.map((item) => {
@@ -248,8 +245,8 @@ function BottomBar({ view, onChange }: BottomBarProps) {
             type="button"
             onClick={() => onChange(item.key)}
             className={cn(
-              'flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 transition-all',
-              active ? 'bg-white/20 text-white' : 'text-white/80 hover:text-white'
+              'flex-1 grid place-items-center gap-1 rounded-xl py-2 text-white/80 transition-colors',
+              active ? 'bg-white/20 text-white' : 'hover:text-white'
             )}
             aria-current={active ? 'page' : undefined}
           >
@@ -275,31 +272,31 @@ function LoginScreen({ onLogin }: LoginScreenProps) {
   return (
     <div className="flex min-h-[75vh] flex-col justify-center gap-10 py-8">
       <div className="flex flex-col items-center gap-4 text-center">
-        <div className={cn(card, 'flex h-16 w-16 items-center justify-center rounded-2xl border-white/15 bg-white/10 text-white')}> 
+        <div className={cn(card, 'flex h-16 w-16 items-center justify-center rounded-2xl border-white/15 bg-white/10 text-white/95')}>
           <Shield className="h-8 w-8" />
         </div>
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-white">Piedmont Ops Training</h1>
-          <p className="text-sm text-white/80">Employee login to practice critical verbiage</p>
+          <h1 className="text-xl font-semibold text-white/95">Piedmont Ops Training</h1>
+          <p className="text-sm text-white/85">Employee login to practice critical verbiage</p>
         </div>
       </div>
-      <form onSubmit={handleSubmit} className={cn(card, 'flex flex-col gap-4 rounded-2xl p-6 text-left')}> 
-        <label className="text-sm text-white/90">
+      <form onSubmit={handleSubmit} className={cn(card, 'flex flex-col gap-4 rounded-2xl p-6 text-left')}>
+        <label className="text-sm text-white/85">
           Email
           <input
             type="email"
             required
             placeholder="you@piedmontair.com"
-            className="mt-1 h-12 w-full rounded-xl border border-white/15 bg-white/10 px-3 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/70"
+            className="mt-1 h-12 w-full rounded-xl border border-white/15 bg-white/10 px-3 text-white/95 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/70"
           />
         </label>
-        <label className="text-sm text-white/90">
+        <label className="text-sm text-white/85">
           Password
           <input
             type="password"
             required
             placeholder="••••••••"
-            className="mt-1 h-12 w-full rounded-xl border border-white/15 bg-white/10 px-3 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/70"
+            className="mt-1 h-12 w-full rounded-xl border border-white/15 bg-white/10 px-3 text-white/95 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/70"
           />
         </label>
         <div className="text-right text-xs text-white/70">
@@ -307,7 +304,7 @@ function LoginScreen({ onLogin }: LoginScreenProps) {
         </div>
         <button
           type="submit"
-          className="h-12 rounded-xl border border-white/15 bg-white/20 font-semibold text-white transition-transform active:scale-95"
+          className="h-12 rounded-xl border border-white/15 bg-white/20 font-semibold text-white/95 transition-transform active:scale-95"
         >
           Login
         </button>
@@ -326,7 +323,7 @@ function HomeScreen({ onOpenLibrary }: HomeScreenProps) {
     <div className="space-y-6 pb-24">
       <header className="text-center">
         <p className="text-xs text-white/70">Welcome back</p>
-        <h1 className="text-lg font-semibold text-white">Employee Dashboard</h1>
+        <h1 className="text-lg font-semibold text-white/95">Employee Dashboard</h1>
       </header>
       <Section title="Assigned Training">
         <div className={cn(card, 'divide-y divide-white/5')}> 
@@ -346,7 +343,7 @@ function HomeScreen({ onOpenLibrary }: HomeScreenProps) {
       <button
         type="button"
         onClick={onOpenLibrary}
-        className="w-full rounded-xl border border-white/15 bg-white/10 py-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/20"
+        className="w-full rounded-xl border border-white/15 bg-white/10 py-3 text-sm font-medium text-white/85 transition-colors hover:bg-white/20"
       >
         Browse Training Library
       </button>
@@ -379,7 +376,7 @@ function TrainingLibrary({ filter, onFilterChange, modules, onBack, onOpen }: Tr
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-semibold text-white">Training Library</h1>
+        <h1 className="text-lg font-semibold text-white/95">Training Library</h1>
       </div>
       <FilterChips value={filter} onChange={onFilterChange} />
       <div className="space-y-4">
@@ -414,27 +411,27 @@ function ProfileScreen({ onBack, onSignOut }: ProfileScreenProps) {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-semibold text-white">Profile</h1>
+        <h1 className="text-lg font-semibold text-white/95">Profile</h1>
       </div>
-      <div className={cn(card, 'flex items-center justify-between gap-3 p-4')}> 
+      <div className={cn(card, 'flex items-center justify-between gap-3 p-4')}>
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white/95">
             <User className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-base font-semibold text-white">Employee Name</p>
+            <p className="text-base font-semibold text-white/95">Employee Name</p>
             <p className="text-xs text-white/70">Ramp Operations • OMA</p>
           </div>
         </div>
         <IdCard className="h-6 w-6 text-white/70" />
       </div>
-      <div className={cn(card, 'p-4')}> 
-        <h3 className="text-sm font-semibold text-white/80">Badges</h3>
+      <div className={cn(card, 'p-4')}>
+        <h3 className="text-sm font-semibold text-white/85">Badges</h3>
         <div className="mt-3 flex flex-wrap gap-2">
           {badges.map((badge) => (
             <span
               key={badge}
-              className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/80"
+              className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/85"
             >
               <BadgeCheck className="h-3.5 w-3.5" />
               {badge}
@@ -442,23 +439,23 @@ function ProfileScreen({ onBack, onSignOut }: ProfileScreenProps) {
           ))}
         </div>
       </div>
-      <div className={cn(card, 'p-4')}> 
-        <h3 className="text-sm font-semibold text-white/80">Certifications</h3>
+      <div className={cn(card, 'p-4')}>
+        <h3 className="text-sm font-semibold text-white/85">Certifications</h3>
         <div className="mt-3 space-y-3 text-sm">
           {certifications.map((item) => (
             <div key={item.title} className="flex items-center justify-between text-white/85">
-              <span className="font-medium">{item.title}</span>
-              <span className="text-xs text-white/60">{item.status}</span>
+              <span className="font-medium text-white/95">{item.title}</span>
+              <span className="text-xs text-white/70">{item.status}</span>
             </div>
           ))}
         </div>
       </div>
-      <div className={cn(card, 'p-4')}> 
-        <h3 className="text-sm font-semibold text-white/80">Preferences</h3>
+      <div className={cn(card, 'p-4')}>
+        <h3 className="text-sm font-semibold text-white/85">Preferences</h3>
         <button
           type="button"
           onClick={onSignOut}
-          className="mt-4 h-12 w-full rounded-xl border border-white/15 bg-white/10 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+          className="mt-4 h-12 w-full rounded-xl border border-white/15 bg-white/10 text-sm font-semibold text-white/85 transition-colors hover:bg-white/20"
         >
           Sign out
         </button>
@@ -484,9 +481,9 @@ function TrainingDetail({ module, onBack }: TrainingDetailProps) {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-lg font-semibold text-white">{module.title}</h1>
+        <h1 className="text-lg font-semibold text-white/95">{module.title}</h1>
       </div>
-      <div className={cn(card, 'p-5 text-sm text-white/80')}> 
+      <div className={cn(card, 'p-5 text-sm text-white/85')}>
         Coming soon: choose level and start/resume.
       </div>
     </div>
@@ -556,7 +553,7 @@ function EmployeeApp() {
   const showBottomBar = view === 'home' || view === 'library' || view === 'profile';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-ashwoodTop to-ashwoodBottom text-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#2D3A4A] to-[#435C73] text-white/85">
       <div className={containerClass}>
         {view === 'login' && <LoginScreen onLogin={handleLogin} />}
         {view === 'home' && <HomeScreen onOpenLibrary={handleOpenLibrary} />}
