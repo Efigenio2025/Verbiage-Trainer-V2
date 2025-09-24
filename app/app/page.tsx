@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import PolarCard from '@/components/PolarCard';
 import RoleBadge from '@/components/RoleBadge';
-import EmployeeTrainingLibrary from '@/components/EmployeeTrainingLibrary';
+import EmployeeDashboardTabs from '@/components/EmployeeDashboardTabs';
 import { createServerSupabase } from '@/lib/serverSupabase';
 import type { PostgrestError } from '@supabase/supabase-js';
 import {
@@ -15,20 +15,9 @@ import {
   managerTeamReadiness
 } from '@/lib/roleDashboards';
 import { trainingLibrary } from '@/lib/trainingLibrary';
+import { normalizeEmployeeView, type EmployeeView } from '@/lib/employeeViews';
 
 type SupportedRole = 'employee' | 'manager' | 'admin';
-
-type EmployeeView = 'home' | 'library' | 'profile';
-
-const employeeViews: EmployeeView[] = ['home', 'library', 'profile'];
-
-function normalizeEmployeeView(view?: string): EmployeeView {
-  if (!view) {
-    return 'home';
-  }
-
-  return employeeViews.includes(view as EmployeeView) ? (view as EmployeeView) : 'home';
-}
 
 type DashboardCommonProps = {
   displayName: string;
@@ -37,51 +26,6 @@ type DashboardCommonProps = {
   updatedAt: Date | null;
   profileError: string | null;
 };
-
-const quickMetrics = [
-  { label: 'Assigned', value: '3' },
-  { label: 'Avg Acc', value: '96%' },
-  { label: 'Streak', value: '5 days' }
-];
-
-const assignedTraining = [
-  { title: 'De-ice Verbiage – Level 1', due: 'Due Fri', tone: 'default' as const },
-  { title: 'Phonetic Alphabet – Accuracy', due: 'Due Today', tone: 'warn' as const },
-  { title: 'Aircraft Movement – Tow & Push', due: 'Due Mon', tone: 'default' as const }
-];
-
-const recentScores = [
-  { label: 'De-ice Callouts Drill', meta: '92% • 2d ago' },
-  { label: 'Phonetic Alphabet Speed', meta: '88% • 5d ago' },
-  { label: 'Pushback Script', meta: '95% • 1w ago' }
-];
-
-const coachingTips = [
-  { icon: '▲', text: 'Your de-ice calls are trending upward—keep the cadence steady during shift change.' },
-  { icon: '▼', text: 'Accuracy dipped on the alphabet sprint; slow the tempo for the next timed drill.' },
-  { icon: '•', text: 'Maintain consistent towing phrasing so the tug team gets the same cues every time.' }
-];
-
-type CertificationTone = 'ok' | 'warn' | 'bad';
-
-type EmployeeCertification = {
-  name: string;
-  status: string;
-  tone: CertificationTone;
-};
-
-const employeeBadges = [
-  'Cold-weather crew lead',
-  'Ramp safety champion',
-  'Phraseology coach',
-  'Operations mentor'
-];
-
-const employeeCertifications: EmployeeCertification[] = [
-  { name: 'De-ice Operations Level 1', status: 'Valid', tone: 'ok' },
-  { name: 'Movement & Pushback Briefing', status: 'Expires soon', tone: 'warn' },
-  { name: 'Radio Phraseology Audit', status: 'Expired', tone: 'bad' }
-];
 
 export default async function AppDashboard({
   searchParams
@@ -146,221 +90,16 @@ function EmployeeDashboard({
   updatedAt,
   view
 }: DashboardCommonProps & { view: EmployeeView }) {
-  const navItems = [
-    { label: 'Home', href: '/app', view: 'home' as const },
-    { label: 'Library', href: '/app?view=library', view: 'library' as const },
-    { label: 'Profile', href: '/app?view=profile', view: 'profile' as const }
-  ];
-
   return (
-    <>
-      {view === 'home' && <EmployeeHome updatedAt={updatedAt} profileError={profileError} />}
-      {view === 'library' && (
-        <EmployeeTrainingLibrary modules={trainingLibrary} backHref="/app" />
-      )}
-      {view === 'profile' && (
-        <EmployeeProfileView
-          displayName={displayName}
-          contactEmail={contactEmail}
-          authEmail={authEmail}
-          profileError={profileError}
-          updatedAt={updatedAt}
-        />
-      )}
-
-      <nav className="employee-dashboard__nav" aria-label="Employee navigation">
-        {navItems.map((item) => {
-          const isActive = item.view === view;
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`employee-dashboard__nav-item${
-                isActive ? ' employee-dashboard__nav-item--active' : ''
-              }`}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <span className="employee-dashboard__nav-label">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    </>
-  );
-}
-
-function EmployeeHome({
-  profileError,
-  updatedAt
-}: {
-  profileError: string | null;
-  updatedAt: Date | null;
-}) {
-  return (
-    <div className="employee-dashboard">
-      <header className="employee-dashboard__header">
-        <p className="employee-dashboard__eyebrow">Welcome back</p>
-        <h1 className="employee-dashboard__title">Employee Dashboard</h1>
-      </header>
-      {updatedAt && (
-        <p className="employee-dashboard__timestamp">Last updated {updatedAt.toLocaleString()}</p>
-      )}
-      {profileError && <p className="employee-dashboard__error">{profileError}</p>}
-
-      <div className="employee-dashboard__metrics">
-        {quickMetrics.map((metric) => (
-          <div key={metric.label} className="employee-dashboard__metric">
-            <span className="employee-dashboard__metric-label">{metric.label}</span>
-            <span className="employee-dashboard__metric-value">{metric.value}</span>
-          </div>
-        ))}
-      </div>
-
-      <section className="employee-dashboard__card">
-        <h2 className="employee-dashboard__card-title">Assigned Training</h2>
-        <div className="employee-dashboard__rows">
-          {assignedTraining.map((training) => (
-            <div key={training.title} className="employee-dashboard__row">
-              <span className="employee-dashboard__row-title">{training.title}</span>
-              <span
-                className={`employee-dashboard__tag${
-                  training.tone === 'warn' ? ' employee-dashboard__tag--warn' : ''
-                }`}
-              >
-                {training.due}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="employee-dashboard__card">
-        <div className="employee-dashboard__card-header">
-          <h2 className="employee-dashboard__card-title">Recent Scores</h2>
-          <Link href="/app?view=library" className="employee-dashboard__action">
-            See all
-          </Link>
-        </div>
-        <div className="employee-dashboard__rows">
-          {recentScores.map((score) => (
-            <div key={score.label} className="employee-dashboard__row">
-              <span className="employee-dashboard__row-title">{score.label}</span>
-              <span className="employee-dashboard__row-meta">{score.meta}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="employee-dashboard__card">
-        <h2 className="employee-dashboard__card-title">Personal Coaching Tips</h2>
-        <ul className="employee-dashboard__tips">
-          {coachingTips.map((tip) => (
-            <li key={tip.text} className="employee-dashboard__tip">
-              <span className="employee-dashboard__tip-icon" aria-hidden="true">
-                {tip.icon}
-              </span>
-              <span>{tip.text}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </div>
-  );
-}
-
-function EmployeeProfileView({
-  authEmail,
-  contactEmail,
-  displayName,
-  profileError,
-  updatedAt
-}: {
-  authEmail: string | null;
-  contactEmail: string;
-  displayName: string;
-  profileError: string | null;
-  updatedAt: Date | null;
-}) {
-  const initials = displayName.charAt(0).toUpperCase();
-
-  return (
-    <div className="employee-profile">
-      <div className="employee-topbar">
-        <Link href="/app" className="employee-topbar__back" aria-label="Back to Home">
-          <svg
-            className="employee-topbar__icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <path
-              d="M15 5L8 12L15 19"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
-        <h1 className="employee-topbar__title">Profile</h1>
-      </div>
-
-      <div className="employee-profile__card employee-profile__identity">
-        <div className="employee-profile__avatar" aria-hidden="true">
-          <span>{initials}</span>
-        </div>
-        <div className="employee-profile__identity-text">
-          <p className="employee-profile__name">{displayName}</p>
-          <p className="employee-profile__subline">Ground Ops • Terminal C</p>
-        </div>
-        <span className="employee-profile__id">ID • EMP-4827</span>
-      </div>
-
-      <section>
-        <h2 className="employee-profile__section-title">Badges</h2>
-        <div className="employee-profile__badges">
-          {employeeBadges.map((badge) => (
-            <span key={badge} className="employee-profile__badge">
-              {badge}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      <section className="employee-profile__card employee-profile__certifications">
-        <h2 className="employee-profile__section-title">Certifications</h2>
-        <div className="employee-profile__cert-list">
-          {employeeCertifications.map((cert) => (
-            <div key={cert.name} className="employee-profile__cert-row">
-              <span className="employee-profile__cert-name">{cert.name}</span>
-              <span
-                className={`employee-profile__status-tag employee-profile__status-tag--${cert.tone}`}
-              >
-                {cert.status}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <button type="button" className="employee-profile__signout">
-        Sign out
-      </button>
-
-      <div className="employee-profile__meta">
-        <p className="employee-profile__meta-line">Contact email: {contactEmail}</p>
-        {authEmail && (
-          <p className="employee-profile__meta-line">Signed in as {authEmail}</p>
-        )}
-        {updatedAt && (
-          <p className="employee-profile__meta-line">
-            Profile updated {updatedAt.toLocaleString()}
-          </p>
-        )}
-        {profileError && <p className="employee-profile__meta-error">{profileError}</p>}
-      </div>
-    </div>
+    <EmployeeDashboardTabs
+      authEmail={authEmail}
+      contactEmail={contactEmail}
+      displayName={displayName}
+      profileError={profileError}
+      updatedAtIso={updatedAt ? updatedAt.toISOString() : null}
+      modules={trainingLibrary}
+      initialView={view}
+    />
   );
 }
 
