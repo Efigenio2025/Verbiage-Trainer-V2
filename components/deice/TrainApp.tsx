@@ -242,11 +242,13 @@ export default function TrainApp() {
     if (typeof window === 'undefined') {
       return;
     }
-    const AnyWindow = window as typeof window & {
-      webkitSpeechRecognition?: typeof window.SpeechRecognition;
+    type SpeechWindow = typeof window & {
+      SpeechRecognition?: unknown;
+      webkitSpeechRecognition?: unknown;
     };
+    const speechWindow = window as SpeechWindow;
     const recognitionAvailable =
-      Boolean(AnyWindow.SpeechRecognition) || Boolean(AnyWindow.webkitSpeechRecognition);
+      Boolean(speechWindow.SpeechRecognition) || Boolean(speechWindow.webkitSpeechRecognition);
     if (!recognitionAvailable) {
       dispatch({ type: 'setMode', mode: 'manual' });
       dispatch({

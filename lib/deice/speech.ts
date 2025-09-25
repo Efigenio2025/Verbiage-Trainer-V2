@@ -2,13 +2,16 @@ import { ListenOptions, ListenResult } from './types';
 
 const BENIGN_ERRORS = new Set(['no-speech', 'aborted', 'network']);
 
-function getSpeechRecognition(): typeof window.SpeechRecognition | null {
+type SpeechRecognitionConstructor = new () => any;
+
+function getSpeechRecognition(): SpeechRecognitionConstructor | null {
   if (typeof window === 'undefined') {
     return null;
   }
 
   const AnyWindow = window as typeof window & {
-    webkitSpeechRecognition?: typeof window.SpeechRecognition;
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
   };
 
   const Recognition = AnyWindow.SpeechRecognition ?? AnyWindow.webkitSpeechRecognition;
@@ -57,7 +60,7 @@ export function listenOnce(options: ListenOptions = {}, attempt = 0): Promise<Li
       resolve(result);
     };
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         const result = event.results[i];
@@ -73,7 +76,7 @@ export function listenOnce(options: ListenOptions = {}, attempt = 0): Promise<Li
       }
     };
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    recognition.onerror = (event: { error: string }) => {
       if (resolved) {
         return;
       }

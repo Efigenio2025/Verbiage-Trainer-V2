@@ -28,9 +28,9 @@ function getSharedAudio() {
 }
 
 function emit(event: AudioStatus) {
-  for (const listener of listeners) {
+  listeners.forEach((listener) => {
     listener(event);
-  }
+  });
 }
 
 export function subscribeToAudio(listener: AudioListener) {
