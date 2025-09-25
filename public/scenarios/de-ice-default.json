@@ -1,0 +1,64 @@
+{
+  "id": "de-ice-default",
+  "label": "Runway 4L holdover rehearsal",
+  "description": "Baseline de-ice communications drill with captain callouts and iceman readbacks.",
+  "metadata": {
+    "holdoverFluid": "Type IV",
+    "holdoverStart": "05:12Z",
+    "holdoverLimit": "05:42Z"
+  },
+  "steps": [
+    {
+      "role": "captain",
+      "text": "Iceman, Polar 418 on stand 27. Request Type IV top-off for runway 4L departure.",
+      "cue": "intro"
+    },
+    {
+      "role": "iceman",
+      "text": "Acknowledge service request and confirm anti-ice configuration.",
+      "expected": [
+        "Polar 418, Type IV application confirmed, wings and tail only, hold short runway 4L"
+      ],
+      "tags": ["acknowledge", "configuration"]
+    },
+    {
+      "role": "captain",
+      "text": "Verify anti-ice fluid, mix ratio, and start time.",
+      "cue": "verify"
+    },
+    {
+      "role": "iceman",
+      "text": "Read back fluid type, mixture, and time stamp with NATO tail number.",
+      "expected": [
+        "Polar 418 heavy, anti-ice fluid Type IV neat, start time zero five one two zulu, tail November Four One Eight Papa"
+      ],
+      "tags": ["holdover", "nato"]
+    },
+    {
+      "role": "captain",
+      "text": "Request holdover expiration warning.",
+      "cue": "holdover"
+    },
+    {
+      "role": "iceman",
+      "text": "Confirm monitoring and share stop time.",
+      "expected": [
+        "Monitoring holdover, expect expiration zero five four two zulu, will advise if conditions degrade"
+      ],
+      "tags": ["monitoring"]
+    },
+    {
+      "role": "captain",
+      "text": "Release to taxi and thank crew.",
+      "cue": "release"
+    },
+    {
+      "role": "iceman",
+      "text": "Close out with clear taxi clearance status and readiness.",
+      "expected": [
+        "Polar 418, de-ice complete, surfaces clean and slick-free, cleared to taxi to runway 4L"
+      ],
+      "tags": ["closeout"]
+    }
+  ]
+}

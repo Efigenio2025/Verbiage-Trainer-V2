@@ -1,0 +1,12 @@
+{
+  "scenarios": [
+    {
+      "id": "de-ice-default",
+      "label": "Runway 4L holdover rehearsal"
+    },
+    {
+      "id": "de-ice-holdover-audit",
+      "label": "Holdover recalculation drill"
+    }
+  ]
+}
