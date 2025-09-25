@@ -1,0 +1,38 @@
+{
+  "id": "de-ice-holdover-audit",
+  "label": "Holdover recalculation drill",
+  "description": "Escalation scenario where holdover time is expiring during a snow burst.",
+  "metadata": {
+    "holdoverFluid": "Type IV",
+    "holdoverStart": "04:48Z",
+    "holdoverLimit": "05:18Z"
+  },
+  "steps": [
+    {
+      "role": "captain",
+      "text": "Iceman, Polar 611 heavy, snow intensifying. Confirm holdover tolerance.",
+      "cue": "check"
+    },
+    {
+      "role": "iceman",
+      "text": "Quote holdover expiration and request recalculation.",
+      "expected": [
+        "Polar 611 heavy, current holdover expires zero five one eight zulu, request recalculation for moderate snow"
+      ],
+      "tags": ["alert"]
+    },
+    {
+      "role": "captain",
+      "text": "Authorize additional spray and request inspection interval.",
+      "cue": "authorize"
+    },
+    {
+      "role": "iceman",
+      "text": "Confirm spray, inspection, and taxi clearance hold.",
+      "expected": [
+        "Additional Type IV spray authorized, inspection in three minutes, hold position until released"
+      ],
+      "tags": ["remediation"]
+    }
+  ]
+}

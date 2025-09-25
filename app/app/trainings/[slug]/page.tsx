@@ -68,6 +68,12 @@ export default function TrainingDetailPage({ params }: TrainingDetailPageProps) 
               Back to dashboard
             </Link>
             <Link
+              href={`/app/trainings/${training.slug}/simulator`}
+              className="btn btn-outline"
+            >
+              Launch simulator
+            </Link>
+            <Link
               href={`/app/trainings/${training.slug}?start=next`}
               className="btn btn-primary"
             >

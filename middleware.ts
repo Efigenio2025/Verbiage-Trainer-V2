@@ -9,10 +9,6 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.next();
-  }
-
   const accessToken = request.cookies.get('sb-access-token')?.value;
   const refreshToken = request.cookies.get('sb-refresh-token')?.value;
 
@@ -21,6 +17,10 @@ export async function middleware(request: NextRequest) {
     redirectUrl.pathname = '/login';
     redirectUrl.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.next();
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -50,10 +50,7 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/login';
-    redirectUrl.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search);
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.next();
   }
 }
 
