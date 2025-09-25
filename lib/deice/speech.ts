@@ -1,133 +1,167 @@
-import { ListenOptions, ListenResult } from './types';
+export type ListenOnceOptions = {
+  minMs?: number;
+  maxMs?: number;
+  silenceMs?: number;
+  onInterim?: (value: string) => void;
+  onStatus?: (value: string) => void;
+};
 
-const BENIGN_ERRORS = new Set(['no-speech', 'aborted', 'network']);
+export type ListenOnceResult = {
+  final: string;
+  interim: string;
+  ended: string;
+};
 
-type SpeechRecognitionConstructor = new () => any;
-
-function getSpeechRecognition(): SpeechRecognitionConstructor | null {
-  if (typeof window === 'undefined') {
-    return null;
+export async function ensureMicPermission(setStatus: (status: string) => void = () => {}) {
+  if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+    setStatus('Microphone permission unavailable.');
+    throw new Error('Media devices not available');
   }
 
-  const AnyWindow = window as typeof window & {
-    SpeechRecognition?: SpeechRecognitionConstructor;
-    webkitSpeechRecognition?: SpeechRecognitionConstructor;
-  };
-
-  const Recognition = AnyWindow.SpeechRecognition ?? AnyWindow.webkitSpeechRecognition;
-  return Recognition ?? null;
+  try {
+    setStatus('Requesting microphone permission…');
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false }
+    });
+    stream.getTracks().forEach((track) => track.stop());
+    setStatus('Microphone ready.');
+    return true;
+  } catch (error) {
+    setStatus('Microphone permission was not granted.');
+    throw error;
+  }
 }
 
-export function listenOnce(options: ListenOptions = {}, attempt = 0): Promise<ListenResult> {
-  if (typeof window === 'undefined') {
-    return Promise.resolve({ ended: 'nosr', transcript: '', confidence: 0 });
-  }
+export function listenOnce({
+  minMs = 200,
+  maxMs = 20000,
+  silenceMs = 3500,
+  onInterim = () => {},
+  onStatus = () => {}
+}: ListenOnceOptions = {}): Promise<ListenOnceResult> {
+  return new Promise((resolve) => {
+    const AnyRecognition =
+      (typeof window !== 'undefined' &&
+        ((window as typeof window & { webkitSpeechRecognition?: any; SpeechRecognition?: any }).SpeechRecognition ||
+          (window as typeof window & { webkitSpeechRecognition?: any; SpeechRecognition?: any }).webkitSpeechRecognition)) ||
+      null;
 
-  const Recognition = getSpeechRecognition();
-  if (!Recognition) {
-    return Promise.resolve({ ended: 'nosr', transcript: '', confidence: 0 });
-  }
+    if (!AnyRecognition) {
+      resolve({ final: '', interim: '', ended: 'nosr' });
+      return;
+    }
 
-  return new Promise<ListenResult>((resolve) => {
-    const recognition = new Recognition();
-    recognition.lang = options.locale ?? 'en-US';
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-    recognition.continuous = false;
+    let finalText = '';
+    let interimText = '';
+    let started = Date.now();
+    let lastActivity = started;
+    let stopped = false;
+    let recognizer: any = null;
 
-    let finalTranscript = '';
-    let confidence = 0;
-    let resolved = false;
-    let durationTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const cleanup = () => {
-      if (durationTimer) {
-        clearTimeout(durationTimer);
-        durationTimer = null;
-      }
-      recognition.onresult = null;
-      recognition.onerror = null;
-      recognition.onend = null;
-      recognition.onspeechend = null;
+    const shouldStop = () => {
+      const now = Date.now();
+      const elapsed = now - started;
+      const idle = now - lastActivity;
+      if (elapsed < minMs) return false;
+      if (idle >= silenceMs) return true;
+      if (elapsed >= maxMs) return true;
+      return false;
     };
 
-    const finish = (result: ListenResult) => {
-      if (resolved) {
-        return;
+    const endAll = (reason = 'end') => {
+      if (stopped) return;
+      stopped = true;
+      try {
+        recognizer?.abort?.();
+      } catch (err) {
+        // ignore
       }
-      resolved = true;
-      cleanup();
-      resolve(result);
+      resolve({ final: finalText.trim(), interim: interimText.trim(), ended: reason });
     };
 
-    recognition.onresult = (event: any) => {
-      let interim = '';
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          finalTranscript += `${result[0].transcript} `;
-          confidence = Math.max(confidence, result[0].confidence ?? 0);
+    const restart = () => {
+      setTimeout(() => {
+        if (!stopped) startRecognizer();
+      }, 140);
+    };
+
+    const startRecognizer = () => {
+      if (stopped || !AnyRecognition) return;
+      recognizer = new AnyRecognition();
+      recognizer.lang = 'en-US';
+      recognizer.continuous = false;
+      recognizer.interimResults = true;
+      recognizer.maxAlternatives = 1;
+
+      recognizer.onstart = () => {
+        lastActivity = Date.now();
+        onStatus('Listening…');
+      };
+      recognizer.onsoundstart = () => {
+        lastActivity = Date.now();
+      };
+      recognizer.onspeechstart = () => {
+        lastActivity = Date.now();
+      };
+      recognizer.onresult = (event: any) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i += 1) {
+          const transcript = event.results[i][0]?.transcript || '';
+          if (transcript) {
+            lastActivity = Date.now();
+          }
+          if (event.results[i].isFinal) {
+            finalText += (finalText ? ' ' : '') + transcript;
+          } else {
+            interim += (interim ? ' ' : '') + transcript;
+          }
+        }
+        interimText = interim;
+        const combined = (finalText + (interimText ? ` ${interimText}` : '')).trim();
+        onInterim(combined);
+      };
+
+      recognizer.onerror = () => {
+        if (shouldStop()) {
+          endAll('error');
         } else {
-          interim += result[0].transcript;
+          restart();
+        }
+      };
+
+      recognizer.onend = () => {
+        if (shouldStop()) {
+          endAll('ended');
+        } else {
+          restart();
+        }
+      };
+
+      try {
+        recognizer.start();
+        onStatus('Listening…');
+      } catch (error) {
+        if (shouldStop()) {
+          endAll('start-failed');
+        } else {
+          restart();
         }
       }
-      if (options.onInterim) {
-        options.onInterim(interim.trim());
-      }
     };
 
-    recognition.onerror = (event: { error: string }) => {
-      if (resolved) {
+    const guard = setInterval(() => {
+      if (stopped) {
+        clearInterval(guard);
         return;
       }
-
-      if (BENIGN_ERRORS.has(event.error) && attempt < 2) {
-        cleanup();
-        recognition.stop();
-        setTimeout(() => {
-          listenOnce(options, attempt + 1).then(resolve);
-        }, 250);
-        return;
+      if (shouldStop()) {
+        clearInterval(guard);
+        endAll('ok');
       }
+    }, 120);
 
-      finish({
-        ended: 'aborted',
-        transcript: finalTranscript.trim(),
-        confidence
-      });
-    };
-
-    recognition.onend = () => {
-      if (resolved) {
-        return;
-      }
-      const trimmed = finalTranscript.trim();
-      if (trimmed) {
-        finish({ ended: 'success', transcript: trimmed, confidence });
-      } else {
-        finish({ ended: 'silence', transcript: '', confidence: 0 });
-      }
-    };
-
-    recognition.onspeechend = () => {
-      recognition.stop();
-    };
-
-    if (options.maxDurationMs) {
-      durationTimer = setTimeout(() => {
-        recognition.stop();
-        finish({
-          ended: 'maxDuration',
-          transcript: finalTranscript.trim(),
-          confidence
-        });
-      }, options.maxDurationMs);
-    }
-
-    try {
-      recognition.start();
-    } catch (error) {
-      finish({ ended: 'aborted', transcript: '', confidence: 0 });
-    }
+    onInterim('');
+    onStatus('Preparing mic…');
+    startRecognizer();
   });
 }
