@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import PolarCard from '@/components/PolarCard';
+import { getBrandName } from '@/lib/brand';
 import { createServerSupabase } from '@/lib/serverSupabase';
 import { getDefaultNextPath, sanitizeNextPath } from '@/lib/sanitizeNextPath';
 import LoginForm from './LoginForm';
@@ -39,9 +40,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(nextParam || getDefaultNextPath());
   }
 
+  const brand = getBrandName();
+
   return (
     <main className="page">
-      <PolarCard title="Welcome back" subtitle="Access the Polar Ops console">
+      <PolarCard title="Welcome back" subtitle={`Access the ${brand} console`}>
         {statusMessage && <p className={`status-message ${statusVariant}`}>{statusMessage}</p>}
         <LoginForm nextPath={nextParam} />
         <PasswordResetForm />

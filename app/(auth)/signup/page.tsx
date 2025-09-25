@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import PolarCard from '@/components/PolarCard';
+import { getBrandName } from '@/lib/brand';
 import { createServerSupabase } from '@/lib/serverSupabase';
 import { sanitizeNextPath } from '@/lib/sanitizeNextPath';
 import SignupForm from './SignupForm';
@@ -20,9 +21,11 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
     redirect(nextParam);
   }
 
+  const brand = getBrandName();
+
   return (
     <main className="page">
-      <PolarCard title="Create your Polar Ops ID" subtitle="Verify your email to access the console">
+      <PolarCard title={`Create your ${brand} ID`} subtitle={`Verify your email to access the ${brand} console`}>
         <SignupForm />
         <p className="helper-text">
           Already verified? <Link href="/login">Sign in</Link> to continue.
