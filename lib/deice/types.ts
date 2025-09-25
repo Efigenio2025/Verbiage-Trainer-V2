@@ -25,18 +25,41 @@ export type ScenarioFile = {
   steps: ScenarioStep[];
 };
 
+export type GradingToken = {
+  word: string;
+  display: string;
+  digits: string;
+  hasDigits: boolean;
+  numberValue: string | null;
+  numberSlots: string[];
+  skeleton: string;
+  phonetic: string;
+  index?: number;
+  [key: string]: unknown;
+};
+
 export type PreparedScenarioStep = ScenarioStep & {
   index: number;
   id: string;
+  _displayLine: string;
+  _expectedGradeText: string;
+  _expectedForGrade: GradingToken[];
 };
 
-export type PreparedScenario = {
-  id: string;
-  label: string;
-  description?: string;
-  metadata?: Record<string, string>;
+export type PreparedScenario = ScenarioFile & {
   steps: PreparedScenarioStep[];
   captainCues: string[];
+  _expectedForGrade: GradingToken[][];
+};
+
+export type DiffToken = {
+  index: number;
+  word: string;
+  display: string;
+  status: 'match' | 'miss' | 'extra';
+  kind: string;
+  saidIndex?: number;
+  expectedIndex?: number;
 };
 
 export type UtteranceScore = {
@@ -44,70 +67,17 @@ export type UtteranceScore = {
   passed: boolean;
   autoPaused: boolean;
   mode: 'speech' | 'manual';
-  diff: DiffChunk[];
+  diff: DiffToken[];
   transcript: string;
   expected: string;
 };
 
-export type DiffChunk = {
-  token: string;
-  type: 'match' | 'missing' | 'extra' | 'mismatch';
-};
-
 export type ScenarioLogEntry = {
   at: number;
-  level: 'info' | 'warning' | 'error';
+  level: 'info' | 'warning' | 'error' | 'debug';
   message: string;
 };
 
-export type SessionStatus =
-  | 'initializing'
-  | 'ready'
-  | 'running'
-  | 'paused'
-  | 'complete'
-  | 'error';
+export type SessionStatus = 'initializing' | 'ready' | 'running' | 'paused' | 'complete' | 'error';
 
 export type CaptureMode = 'speech' | 'manual';
-
-export type TrainerState = {
-  status: SessionStatus;
-  mode: CaptureMode;
-  scenario: PreparedScenario | null;
-  stepIndex: number;
-  log: ScenarioLogEntry[];
-  retries: Record<number, number>;
-  scores: Record<number, UtteranceScore | null>;
-  interimTranscript: string;
-  activeSessionId: string | null;
-};
-
-export type GradeOptions = {
-  passThreshold: number;
-  pauseThreshold: number;
-  enableFuzzy: boolean;
-  enableNato: boolean;
-};
-
-export type ListenOptions = {
-  locale?: string;
-  maxDurationMs?: number;
-  onInterim?: (transcript: string) => void;
-};
-
-export type ListenResult =
-  | {
-      ended: 'success';
-      transcript: string;
-      confidence: number;
-    }
-  | {
-      ended: 'silence' | 'maxDuration' | 'aborted';
-      transcript: string;
-      confidence: number;
-    }
-  | {
-      ended: 'nosr';
-      transcript: '';
-      confidence: 0;
-    };

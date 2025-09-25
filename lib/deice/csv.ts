@@ -21,7 +21,7 @@ export function createCsv(
   scenario: PreparedScenario,
   scores: Record<number, UtteranceScore | null>
 ): string {
-  const rows: ScoreRecord[] = scenario.steps.map((step) => ({
+  const rows: ScoreRecord[] = scenario.steps.map((step: PreparedScenario['steps'][number]) => ({
     stepIndex: step.index + 1,
     prompt: step.text,
     role: step.role,

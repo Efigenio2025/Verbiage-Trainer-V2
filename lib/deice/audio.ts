@@ -1,190 +1,173 @@
-import { ScenarioLogEntry } from './types';
+export type AudioStatusEvent =
+  | { who: 'captain'; status: 'loading' | 'playing' | 'ended' | 'error'; src?: string }
+  | { who: 'captain'; status: 'unlocked' | 'idle' };
 
-type AudioStatus =
-  | { type: 'idle' }
-  | { type: 'loading'; cue: string }
-  | { type: 'playing'; cue: string }
-  | { type: 'ended'; cue: string }
-  | { type: 'error'; cue: string; error: Error };
+const SUPPORTED_EXTS = ['mp3', 'm4a'];
+const ROOT = '/audio';
 
-type AudioListener = (event: AudioStatus) => void;
-
-const listeners = new Set<AudioListener>();
-const cueCache = new Map<string, boolean>();
 let sharedAudio: HTMLAudioElement | null = null;
-let currentUnlockPromise: Promise<void> | null = null;
 
-function getSharedAudio() {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
+function getAudioEl() {
+  if (typeof window === 'undefined') return null;
   if (!sharedAudio) {
-    sharedAudio = document.createElement('audio');
+    sharedAudio = new Audio();
     sharedAudio.preload = 'auto';
+    sharedAudio.crossOrigin = 'anonymous';
+    sharedAudio.setAttribute('playsinline', 'true');
   }
-
   return sharedAudio;
 }
 
-function emit(event: AudioStatus) {
-  listeners.forEach((listener) => {
-    listener(event);
-  });
+const bus: EventTarget | null = typeof window !== 'undefined' ? new EventTarget() : null;
+
+export function onAudio(handler: (event: AudioStatusEvent) => void) {
+  if (!bus) return () => {};
+  const wrapped = (evt: Event) => {
+    const detail = (evt as CustomEvent<AudioStatusEvent>).detail;
+    handler(detail);
+  };
+  bus.addEventListener('status', wrapped as EventListener);
+  return () => bus.removeEventListener('status', wrapped as EventListener);
 }
 
-export function subscribeToAudio(listener: AudioListener) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
+function emit(event: AudioStatusEvent) {
+  if (!bus) return;
+  bus.dispatchEvent(new CustomEvent('status', { detail: event }));
 }
 
-export async function unlockAudioContext() {
-  if (typeof window === 'undefined') {
-    return;
-  }
+export async function unlockAudio() {
+  const el = getAudioEl();
+  if (!el) return;
 
-  if (!currentUnlockPromise) {
-    currentUnlockPromise = (async () => {
-      const AnyContext =
-        (window as typeof window & {
-          webkitAudioContext?: typeof AudioContext;
-        }).AudioContext ??
-        (window as typeof window & { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext;
-
-      if (!AnyContext) {
-        return;
+  try {
+    const Ctx =
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).AudioContext ||
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (Ctx) {
+      const ctx = (window as typeof window & { __ac?: AudioContext }).__ac || new Ctx();
+      (window as typeof window & { __ac?: AudioContext }).__ac = ctx;
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
       }
-
-      const context = new AnyContext();
-      if (context.state === 'suspended') {
-        await context.resume();
-      }
-      // Create a short silent buffer to fully unlock iOS playback
-      const buffer = context.createBuffer(1, 1, 22050);
-      const source = context.createBufferSource();
-      source.buffer = buffer;
-      source.connect(context.destination);
-      source.start(0);
-    })();
-  }
-
-  await currentUnlockPromise;
-}
-
-function cueKey(scenarioId: string, cue: string, ext: string) {
-  return `${scenarioId}:${cue}:${ext}`;
-}
-
-async function tryLoad(url: string) {
-  return new Promise<void>((resolve, reject) => {
-    const audio = document.createElement('audio');
-    audio.preload = 'auto';
-    const cleanup = () => {
-      audio.removeEventListener('canplaythrough', handleCanPlay);
-      audio.removeEventListener('error', handleError);
-    };
-
-    const handleCanPlay = () => {
-      cleanup();
-      resolve();
-    };
-
-    const handleError = () => {
-      cleanup();
-      reject(new Error(`Failed to preload ${url}`));
-    };
-
-    audio.addEventListener('canplaythrough', handleCanPlay);
-    audio.addEventListener('error', handleError);
-    audio.src = url;
-    audio.load();
-  });
-}
-
-export async function preloadCaptainCues(
-  scenarioId: string,
-  cues: string[]
-): Promise<ScenarioLogEntry[]> {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-
-  const logs: ScenarioLogEntry[] = [];
-
-  for (const cue of cues) {
-    for (const ext of ['mp3', 'm4a']) {
-      const key = cueKey(scenarioId, cue, ext);
-      if (cueCache.get(key)) {
-        continue;
-      }
-
-      const url = `/audio/${scenarioId}/captain_${cue}.${ext}`;
-      try {
-        await tryLoad(url);
-        cueCache.set(key, true);
-        logs.push({
-          at: Date.now(),
-          level: 'info',
-          message: `Preloaded cue ${cue}.${ext}`
-        });
-      } catch (error) {
-        logs.push({
-          at: Date.now(),
-          level: 'warning',
-          message: `Unable to preload ${url}: ${(error as Error).message}`
-        });
-      }
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.01);
     }
+  } catch (err) {
+    // ignore
   }
 
-  return logs;
+  try {
+    el.muted = true;
+    await el.play().catch(() => {});
+    el.pause();
+    el.currentTime = 0;
+    el.muted = false;
+  } catch (err) {
+    // ignore
+  }
+
+  emit({ who: 'captain', status: 'unlocked' });
 }
 
-export async function playCaptainCue(
-  scenarioId: string,
-  cue: string
-): Promise<boolean> {
-  const audio = getSharedAudio();
-  if (!audio) {
-    return false;
-  }
+function captainSrc(scnId: string, cue: string, ext: string) {
+  return `${ROOT}/${scnId}/captain_${cue}.${ext}`;
+}
 
-  emit({ type: 'loading', cue });
+async function playFromCandidates(label: 'captain', candidates: string[]) {
+  const el = getAudioEl();
+  if (!el) return false;
 
-  for (const ext of ['mp3', 'm4a']) {
-    const url = `/audio/${scenarioId}/captain_${cue}.${ext}`;
-    audio.src = url;
+  el.onended = el.onerror = el.oncanplay = el.onloadedmetadata = null;
+  emit({ who: label, status: 'loading' });
 
+  let lastErr: unknown = null;
+
+  for (const src of candidates) {
     try {
-      await audio.play();
-      emit({ type: 'playing', cue });
-
-      await new Promise<void>((resolve) => {
-        const handleEnded = () => {
-          audio.removeEventListener('ended', handleEnded);
-          resolve();
-        };
-        audio.addEventListener('ended', handleEnded, { once: true });
-      });
-
-      emit({ type: 'ended', cue });
-      return true;
-    } catch (error) {
-      emit({ type: 'error', cue, error: error as Error });
+      el.pause();
+      el.currentTime = 0;
+    } catch (err) {
+      // ignore
     }
+
+    el.src = src;
+    try {
+      el.load();
+    } catch (err) {
+      // ignore
+    }
+
+    el.muted = false;
+    el.volume = 1;
+
+    const ok = await new Promise<boolean>((resolve) => {
+      let guard: ReturnType<typeof setTimeout> | null = null;
+
+      el.onloadedmetadata = () => {
+        const ms = isFinite(el.duration) && el.duration > 0 ? Math.min(15000, el.duration * 1000 + 1000) : 12000;
+        guard = setTimeout(() => resolve(true), ms);
+      };
+
+      el.oncanplay = async () => {
+        try {
+          await el.play();
+          emit({ who: label, status: 'playing', src });
+        } catch (err) {
+          lastErr = err;
+          resolve(false);
+        }
+      };
+
+      el.onended = () => {
+        if (guard) clearTimeout(guard);
+        emit({ who: label, status: 'ended' });
+        resolve(true);
+      };
+
+      el.onerror = () => {
+        resolve(false);
+      };
+    });
+
+    if (ok) return true;
   }
 
+  console.error(`[audio] failed for ${label}`, { lastErr, candidates });
+  emit({ who: label, status: 'error' });
   return false;
 }
 
-export function stopAudio() {
-  const audio = getSharedAudio();
-  if (!audio) {
-    return;
-  }
+export async function playCaptainCue(scnId: string, cue: string) {
+  const candidates = SUPPORTED_EXTS.map((ext) => captainSrc(scnId, cue, ext));
+  return playFromCandidates('captain', candidates);
+}
 
-  audio.pause();
-  audio.currentTime = 0;
-  emit({ type: 'idle' });
+export function preloadCaptainCues(scnId: string, cues: string[] = []) {
+  if (typeof document === 'undefined') return;
+  cues.forEach((cue) => {
+    SUPPORTED_EXTS.forEach((ext) => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'audio';
+      link.href = captainSrc(scnId, cue, ext);
+      document.head.appendChild(link);
+    });
+  });
+}
+
+export function stopAudio() {
+  const el = getAudioEl();
+  try {
+    el?.pause();
+  } catch (err) {
+    // ignore
+  }
+  if (el) {
+    el.currentTime = 0;
+    emit({ who: 'captain', status: 'idle' });
+  }
 }
