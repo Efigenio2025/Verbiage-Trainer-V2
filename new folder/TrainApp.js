@@ -1,6 +1,3 @@
-// @ts-nocheck
-'use client';
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   unlockAudio,
@@ -8,10 +5,10 @@ import {
   preloadCaptainCues,
   onAudio,
   stopAudio,
-} from "@/lib/deice/audio";
-import { listenOnce } from "@/lib/deice/speech";
-import { prepareScenarioForGrading, scoreWords, diffWords } from "@/lib/deice/scoring";
-import { quickScoreDetail } from "@/lib/deice/quickScore";
+} from "../lib/audio";
+import { listenOnce } from "../lib/speech";
+import { prepareScenarioForGrading, scoreWords, diffWords } from "@/lib/scoring";
+import { quickScoreDetail } from "@/lib/quickScore";
 
 /**
  * Training simulator UI.
@@ -263,7 +260,7 @@ function downloadCSV(rows, filename = "deice-results.csv") {
   URL.revokeObjectURL(url);
 }
 
-function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
+function TrainApp({ forcedMode }) {
   // scenario list + current
   const [scenarioList, setScenarioList] = useState([]);
   const [preparedScenario, setPreparedScenario] = useState(null);
@@ -380,19 +377,15 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
     setLastDiff(null);
   }, [stepIndex]);
 
-  const gradedTotal = useMemo(() => (steps || []).filter((s) => s.role === "iceman").length, [steps]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const gradedTotal = useMemo(() => (steps || []).filter((s) => s.role === "Iceman").length, [steps]);
   const correct = useMemo(() => {
-    resultsVersion;
     return (resultsRef.current || []).reduce((acc, val, idx) => {
-      return acc + (steps[idx]?.role === "iceman" && val === true ? 1 : 0);
+      return acc + (steps[idx]?.role === "Iceman" && val === true ? 1 : 0);
     }, 0);
   }, [steps, resultsVersion]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const totalScore = useMemo(() => {
-    resultsVersion;
     return (scoresRef.current || []).reduce((acc, val, idx) => {
-      return acc + (steps[idx]?.role === "iceman" && typeof val === "number" ? val : 0);
+      return acc + (steps[idx]?.role === "Iceman" && typeof val === "number" ? val : 0);
     }, 0);
   }, [steps, resultsVersion]);
   const totalPossible = gradedTotal * 100;
@@ -470,10 +463,9 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
     (async () => {
       try {
         const res = await fetch("/scenarios/index.json");
-        const manifest = await res.json();
+        const list = await res.json();
         if (!live) return;
-        const list = Array.isArray(manifest) ? manifest : manifest?.scenarios || [];
-        setScenarioList(list);
+        setScenarioList(list || []);
         if (list && list[0]) {
           // auto-load first scenario
           const res2 = await fetch(`/scenarios/${list[0].id}.json`);
@@ -526,7 +518,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
   function preloadCaptainForScenario(scn) {
     const scnId = scn?.id;
     if (!scnId) return;
-    const cues = Array.from(new Set((scn.steps || []).filter((s) => s.role === "captain" && s.cue).map((s) => s.cue)));
+    const cues = Array.from(new Set((scn.steps || []).filter((s) => s.role === "Captain" && s.cue).map((s) => s.cue)));
     preloadCaptainCues(scnId, cues);
   }
 
@@ -566,7 +558,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
         log("Speech capture not supported; running in manual mode.");
       }
 
-      const cues = (current?.steps || []).filter((s) => s.role === "captain" && s.cue).map((s) => s.cue);
+      const cues = (current?.steps || []).filter((s) => s.role === "Captain" && s.cue).map((s) => s.cue);
       if (cues.length) {
         preloadCaptainCues(current?.id || "default", cues);
         log(`Preloaded Captain cues: ${cues.join(", ")}`);
@@ -769,7 +761,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
           const diff = diffWords(result);
           setLastDiff(diff);
           setLastResultText(ok ? `✅ Good (${summary})` : `❌ Try again (${summary})`);
-          const severeMiss = step?.role === "iceman" && percent < LOW_SCORE_PAUSE_THRESHOLD;
+          const severeMiss = step?.role === "Iceman" && percent < LOW_SCORE_PAUSE_THRESHOLD;
           if (!ok) {
             setRetryCount((n) => n + 1);
             if (!severeMiss) {
@@ -798,7 +790,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
 
       setStepIndex(idx);
 
-      if (step.role === "captain") {
+      if (step.role === "Captain") {
         if (step.cue && current?.id) {
           try {
             await playCaptainCue(current.id, step.cue);
@@ -810,7 +802,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
           resultsRef.current[idx] = true;
           setResultsVersion((v) => v + 1);
         }
-      } else if (step.role === "iceman") {
+      } else if (step.role === "Iceman") {
         if (captureModeRef.current !== "speech") {
           const shouldContinue = await awaitManualResponse(step);
           if (!shouldContinue) break;
@@ -868,7 +860,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
         const percent = result?.percent ?? 0;
         const ok = percent >= SCORE_THRESHOLD;
         const summary = formatScoreSummary(result);
-        const severeMiss = step?.role === "iceman" && percent < LOW_SCORE_PAUSE_THRESHOLD;
+        const severeMiss = step?.role === "Iceman" && percent < LOW_SCORE_PAUSE_THRESHOLD;
         resultsRef.current[idx] = ok;
         scoresRef.current[idx] = percent;
         setResultsVersion((v) => v + 1);
@@ -923,7 +915,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
       pausedRef.current = false;
       setRunState("idle");
       const okCount = (resultsRef.current || []).reduce((acc, val, i) => {
-        return acc + (steps[i]?.role === "iceman" && val === true ? 1 : 0);
+        return acc + (steps[i]?.role === "Iceman" && val === true ? 1 : 0);
       }, 0);
       const finalPct = gradedTotal ? Math.round((okCount / gradedTotal) * 100) : 0;
       setStatus(`Complete • ${okCount}/${gradedTotal} (${finalPct}%) • ${finalPct >= 80 ? "PASS" : "RETRY"}`);
@@ -957,7 +949,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
             resolvePrompt({ silent: true });
             setStepIndex(i);
             const s = steps[i];
-            if (s?.role === "captain" && s.cue && current?.id) playCaptainCue(current.id, s.cue);
+            if (s?.role === "Captain" && s.cue && current?.id) playCaptainCue(current.id, s.cue);
           }}
         />
       </div>
@@ -971,7 +963,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
   const titleBlock = (
     <div className="pm-title">
       <div className="pm-titleBrand">
-        <span className="pm-brandWord">Piedmont Airlines</span>
+        <img src="/images/piedmont-logo.png" alt="Piedmont Airlines" />
         <div className="pm-titleText">
           <h1>Deice Verbiage Trainer</h1>
           <span className="pm-badge pm-titleBadge">V2 • For training purposes only • OMA Station • 2025</span>
@@ -1282,7 +1274,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
             {captureMode !== "speech" && (
               <div className="pm-manualNotice">
                 <span className="pm-pill pm-pillWarn">
-                  Speech capture isn’t available on this device. Type your response and use Proceed.
+                  Speech capture isn't available on this device. Type your response and use Proceed.
                 </span>
               </div>
             )}
@@ -1311,7 +1303,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
                   setStepIndex((i) => {
                     const n = Math.max(0, (typeof i === "number" ? i : 0) - 1);
                     const s = steps[n];
-                    if (s?.role === "captain" && s.cue && current?.id) playCaptainCue(current.id, s.cue);
+                    if (s?.role === "Captain" && s.cue && current?.id) playCaptainCue(current.id, s.cue);
                     return n;
                   });
                 }}
@@ -1329,7 +1321,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
                   setStepIndex((i) => {
                     const n = Math.min(total - 1, (typeof i === "number" ? i : -1) + 1);
                     const s = steps[n];
-                    if (s?.role === "captain" && s.cue && current?.id) playCaptainCue(current.id, s.cue);
+                    if (s?.role === "Captain" && s.cue && current?.id) playCaptainCue(current.id, s.cue);
                     return n;
                   });
                 }}
@@ -1340,7 +1332,7 @@ function TrainApp({ forcedMode }: { forcedMode?: 'desktop' | 'mobile' } = {}) {
                 className={`pm-btn${isMobile ? " pm-mobileNavBtn" : ""}`}
                 onClick={() => {
                   const s = steps[stepIndex];
-                  if (s?.role === "captain" && s.cue && current?.id) playCaptainCue(current.id, s.cue);
+                  if (s?.role === "Captain" && s.cue && current?.id) playCaptainCue(current.id, s.cue);
                 }}
               >
                 ▶︎ Play line
