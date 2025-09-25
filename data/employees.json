@@ -1,0 +1,38 @@
+[
+  {
+    "id": "avery-williams",
+    "name": "Avery Williams",
+    "role": "Lead De-ice Coordinator",
+    "base": "IAD",
+    "department": "Ramp Control",
+    "email": "avery.williams@example.com",
+    "defaultScenario": "de-ice-default",
+    "prefersMobile": false,
+    "tags": ["Night shift", "Crew 4"],
+    "qualifications": ["Type I/IV Supervisor", "Cold-soak response"],
+    "links": {
+      "desktop": "/app/trainings/de-ice-procedures/simulator",
+      "mobile": "/app/trainings/de-ice-procedures/simulator?mode=mobile",
+      "profile": "/app/personnel/avery-williams"
+    },
+    "isDefault": true
+  },
+  {
+    "id": "lina-cho",
+    "name": "Lina Cho",
+    "role": "Dispatcher II",
+    "base": "MSP",
+    "department": "Operations Center",
+    "email": "lina.cho@example.com",
+    "defaultScenario": "de-ice-holdover-audit",
+    "prefersMobile": true,
+    "tags": ["Holdover specialist"],
+    "qualifications": ["NATA Level 3", "Type IV auditor"],
+    "links": {
+      "desktop": "/app/trainings/de-ice-procedures/simulator",
+      "mobile": "/app/trainings/de-ice-procedures/simulator?mode=mobile",
+      "profile": "/app/personnel/lina-cho"
+    },
+    "isDefault": false
+  }
+]

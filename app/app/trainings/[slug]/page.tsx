@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PolarCard from '@/components/PolarCard';
+import { createServerSupabase } from '@/lib/serverSupabase';
 import { getTrainingModule } from '@/lib/trainingLibrary';
 
 type TrainingDetailPageProps = {
@@ -9,11 +10,28 @@ type TrainingDetailPageProps = {
   };
 };
 
-export default function TrainingDetailPage({ params }: TrainingDetailPageProps) {
+export default async function TrainingDetailPage({ params }: TrainingDetailPageProps) {
   const training = getTrainingModule(params.slug);
 
   if (!training) {
     notFound();
+  }
+
+  const supabase = await createServerSupabase();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  let isAdmin = false;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    isAdmin = profile?.role === 'admin';
   }
 
   return (
@@ -67,6 +85,20 @@ export default function TrainingDetailPage({ params }: TrainingDetailPageProps) 
             <Link href="/app" className="btn btn-outline">
               Back to dashboard
             </Link>
+            <Link
+              href={`/app/trainings/${training.slug}/simulator`}
+              className="btn btn-outline"
+            >
+              Launch simulator
+            </Link>
+            {isAdmin && training.slug === 'de-ice-procedures' ? (
+              <Link
+                href={`/app/trainings/${training.slug}/scenarios`}
+                className="btn btn-outline"
+              >
+                Manage scenarios
+              </Link>
+            ) : null}
             <Link
               href={`/app/trainings/${training.slug}?start=next`}
               className="btn btn-primary"
