@@ -1,0 +1,51 @@
+{
+  "id": "full_body_type_1",
+  "label": "Full Body Type I Only",
+  "steps": [
+    {
+      "role": "Captain",
+      "cue": "hail",
+      "text": "Iceman, this is N443DF, do you copy?"
+    },
+    {
+      "role": "Iceman",
+      "text": "Go for iceman N443DF."
+    },
+    {
+      "role": "Captain",
+      "cue": "init",
+      "text": "Iceman, N443DF, we’ll need a full body Type 1 deicing today."
+    },
+    {
+      "role": "Iceman",
+      "text": "Copy that N443DF you are requesting full body type 1. Please prepare the aircraft for type 1 application."
+    },
+    {
+      "role": "Captain",
+      "cue": "ready",
+      "text": "Iceman, aircraft N443DF ready for deicing. Engines running, APU is off."
+    },
+    {
+      "role": "Iceman",
+      "text": "Copy that N443DF. Engines are running with APU off, full body type 1. Starting application now."
+    },
+    {
+      "role": "Iceman",
+      "text": "Aircraft N443DF, do you copy?"
+    },
+    {
+      "role": "Captain",
+      "cue": "ack_update",
+      "text": "Go ahead, Iceman, for aircraft N443DF."
+    },
+    {
+      "role": "Iceman",
+      "text": "Yes N443DF deicing is complete. Post-deicing check complete, personnel and equipment are safely out of the way. Have a safe flight."
+    },
+    {
+      "role": "Captain",
+      "cue": "final",
+      "text": "Hey, iceman, aircraft N443DF copies. Thank you for your help and stay warm out there!"
+    }
+  ]
+}
